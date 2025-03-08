@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="bg-white p-6 mt-6 rounded shadow">
+      <h2 class="text-xl font-semibold mb-4">Bookings</h2>
+      <table class="w-full border-collapse border">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="p-2 border">Tickets</th>
+            <th class="p-2 border">Passengers</th>
+            <th class="p-2 border">Booking ID</th>
+            <th class="p-2 border">Total Price</th>
+          </tr>
+          <% bookings.forEach(tour => { %>
+          <tr class="text-center">
+            <td class="p-2 border"><%= tour.tickets %></td>
+            <% if (!tour.passengers) { %>
+            <td class="p-2 border">No Passengers</td>
+            <% } else { %>
+            <td class="p-2 border">
+              <% tour.passengers.forEach(passenger => { %> <%= passenger.name %>
+              <br /><% }) %>
+            </td>
+
+            <% } %>
+
+            <td class="p-2 border"><%= tour.bookingId %></td>
+            <td class="p-2 border">₹<%= tour.totalPrice %></td>
+          </tr>
+          <% }); %>
+        </thead>
+      </table>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Tickets</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 text-gray-900">
+    <div
+      id="flashCard"
+      class="fixed top-5 right-5 bg-white shadow-lg rounded-lg p-4 hidden transition-all duration-300 z-50"
+    >
+      <p id="flashMessage" class="text-black"></p>
+    </div>
+    <div class="max-w-2xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+      <h1 class="text-2xl font-bold text-center text-blue-600">
+        Book Your Tickets
+      </h1>
+      <h2 class="text-lg text-center text-gray-700">
+        <%= tour.name %> - <%= tour.location %>
+      </h2>
+      <p class="text-center mt-2">
+        <strong>Price Per Ticket:</strong> ₹<span id="price"
+          ><%= tour.pricePerTicket %></span
+        >
+      </p>
+      <p class="text-center mt-1 text-gray-600">
+        <strong>Available Seats:</strong>
+        <span id="availableSeats"><%= tour.availableSeats %></span>
+      </p>
+
+      <div
+        id="seatsError"
+        class="mt-2 text-center text-red-500 font-medium hidden"
+      >
+        You cannot book more than the available seats!
+      </div>
+
+      <form
+        id="bookingForm"
+        action="/users/book-ticket/<%= tour._id %>"
+        method="POST"
+        class="mt-5"
+      >
+        <label for="numSeats" class="block text-sm font-medium"
+          >Number of Seats</label
+        >
+        <input
+          type="number"
+          id="numSeats"
+          name="numSeats"
+          min="1"
+          max="<%= tour.availableSeats %>"
+          required
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+          oninput="validateAndGenerateFields()"
+        />
+
+        <div
+          id="passengerFields"
+          class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4"
+        ></div>
+
+        <p class="mt-4 text-xl font-semibold text-red-500">
+          Total Price: ₹<span id="totalPrice">0</span>
+        </p>
+
+        <button
+          id="submitButton"
+          type="submit"
+          class="w-full bg-blue-600 text-white py-2 rounded mt-4 hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled
+        >
+          Confirm Booking
+        </button>
+      </form>
+    </div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+      // Store form validity state
+      let formIsValid = false;
+      let seatsValid = false;
+      document
+        .getElementById("submitButton")
+        .addEventListener("click", async (e) => {
+          e.preventDefault();
+
+          let numSeats = document.getElementById("numSeats").value;
+          let pricePerTicket = parseInt(
+            document.getElementById("price").innerText
+          );
+          let totalAmount = numSeats * pricePerTicket;
+          let passengers = [];
+          for (let i = 1; i <= numSeats; i++) {
+            let passenger = {
+              name: document.getElementById(`passenger${i}_name`).value.trim(),
+              age: document.getElementById(`passenger${i}_age`).value,
+              gender: document.getElementById(`passenger${i}_gender`).value,
+            };
+            passengers.push(passenger);
+          }
+
+          // Send request to backend to create a Razorpay order
+          let response = await fetch("/users/create-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: totalAmount }),
+          });
+
+          let data = await response.json();
+
+          if (!data.success) {
+            alert("Error creating payment order. Please try again.");
+            return;
+          }
+
+          let options = {
+            key: "rzp_test_JXBfaYRlMaxncG", // Use Razorpay test key
+            amount: totalAmount * 100, // Amount in paise
+            currency: "INR",
+            name: "SafeTravel",
+            description: "Train Ticket Booking",
+            order_id: data.order.id,
+            handler: async function (response) {
+              alert(
+                "Payment Successful! Payment ID: " +
+                  response.razorpay_payment_id
+              );
+
+              // After successful payment, send booking request
+              let bookingResponse = await fetch(
+                `/users/book-ticket/<%= tour._id %>`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({
+                    numSeats: numSeats,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    passengers: passengers,
+                    response: response,
+                  }),
+                }
+              );
+
+              let bookingData = await bookingResponse.json();
+
+              if (bookingData.success) {
+                let flashCard = document.getElementById("flashCard");
+                let flashMessage = document.getElementById("flashMessage");
+
+                flashMessage.innerText = "Booking Successful!";
+                flashMessage.className = "text-green-600";
+                flashCard.classList.remove("hidden");
+
+                setTimeout(() => {
+                  window.location.href = "/users/dashboard";
+                }, 2000);
+              } else {
+                alert("Booking failed. Please contact support.");
+              }
+            },
+          };
+
+          let rzp = new Razorpay(options);
+          rzp.open();
+        });
+
+      function validateAndGenerateFields() {
+        let numSeats = document.getElementById("numSeats").value;
+        let availableSeats = parseInt(
+          document.getElementById("availableSeats").innerText
+        );
+        let seatsError = document.getElementById("seatsError");
+
+        // Validate seat numbers
+        if (numSeats > availableSeats) {
+          seatsError.classList.remove("hidden");
+          seatsValid = false;
+        } else {
+          seatsError.classList.add("hidden");
+          seatsValid = true;
+        }
+
+        generatePassengerFields();
+        validateForm();
+      }
+
+      function generatePassengerFields() {
+        let numSeats = document.getElementById("numSeats").value;
+        let container = document.getElementById("passengerFields");
+        let pricePerTicket = parseInt(
+          document.getElementById("price").innerText
+        );
+        let totalPrice = document.getElementById("totalPrice");
+
+        container.innerHTML = "";
+
+        if (numSeats > 0) {
+          for (let i = 1; i <= numSeats; i++) {
+            let passengerDiv = document.createElement("div");
+            passengerDiv.className = "bg-gray-200 p-3 rounded-md";
+            passengerDiv.innerHTML = `
+                <label class="block text-sm font-medium">Passenger ${i} Name</label>
+                <input type="text" name="passenger${i}_name" id="passenger${i}_name" required 
+                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                       oninput="validateForm()">
+                
+                <label class="block text-sm font-medium mt-2">Passenger ${i} Age</label>
+                <input type="number" name="passenger${i}_age" id="passenger${i}_age" required min="1" 
+                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                       oninput="validateForm()">
+                       <label class="block text-sm font-medium mt-2">Passenger ${i} Gender</label>
+                <select name="passenger${i}_gender" id="passenger${i}_gender" required 
+                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                       oninput="validateForm()">
+                       <option value="male">Male</option>
+                       <option value="female">Female</option>
+                       <option value="other">Other</option>
+                        </select>
+            `;
+            container.appendChild(passengerDiv);
+          }
+          totalPrice.innerText = numSeats * pricePerTicket;
+        } else {
+          totalPrice.innerText = "0";
+        }
+      }
+
+      function validateForm() {
+        const submitButton = document.getElementById("submitButton");
+        const numSeats =
+          parseInt(document.getElementById("numSeats").value) || 0;
+
+        // If seats are invalid, disable button
+        if (!seatsValid || numSeats <= 0) {
+          submitButton.disabled = true;
+          return;
+        }
+
+        // Check if all passenger fields are filled
+        let allFieldsFilled = true;
+
+        for (let i = 1; i <= numSeats; i++) {
+          const nameField = document.getElementById(`passenger${i}_name`);
+          const ageField = document.getElementById(`passenger${i}_age`);
+
+          if (
+            !nameField ||
+            !ageField ||
+            !nameField.value.trim() ||
+            !ageField.value
+          ) {
+            allFieldsFilled = false;
+            break;
+          }
+        }
+
+        // Enable or disable button based on validation
+        submitButton.disabled = !allFieldsFilled;
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1E293B" /* Dark Blue */,
+              secondary: "#475569" /* Grayish Blue */,
+              accent: "#06b6d4" /* Cyan */,
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-primary text-white min-h-screen">
+    <div class="flex justify-center items-center min-h-[90vh]">
+      <div class="bg-secondary p-8 rounded-lg shadow-lg max-w-md w-full">
+        <!-- Tabs -->
+        <div
+          class="flex border-b justify-evenly items-center border-gray-600 mb-6"
+        >
+          <button
+            id="user-tab"
+            class="py-2 px-4 font-medium border-b-2 hover:border-accent hover:text-accent"
+          >
+            User Login
+          </button>
+          <button
+            id="admin-tab"
+            class="py-2 px-4 font-medium border-b-2 hover:border-accent hover:text-accent"
+          >
+            Admin Login
+          </button>
+        </div>
+
+        <!-- Flash Messages -->
+        <%- include('partials/messages') %>
+
+        <!-- User Login Form -->
+        <div id="user-login" class="block">
+          <h1 class="text-2xl font-bold text-center mb-4">User Login</h1>
+          <form action="/login" method="POST" class="space-y-4">
+            <input type="hidden" name="role" value="user" />
+            <div>
+              <label for="user-email" class="block text-sm font-medium"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="user-email"
+                name="email"
+                class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent text-black"
+                placeholder="Enter Email"
+                required
+              />
+            </div>
+
+            <div>
+              <label for="user-password" class="block text-sm font-medium"
+                >Password</label
+              >
+              <input
+                type="password"
+                id="user-password"
+                name="password"
+                class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent text-black"
+                placeholder="Enter Password"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="w-full bg-accent text-white py-2 rounded hover:bg-cyan-500 transition"
+            >
+              Login
+            </button>
+          </form>
+
+          <p class="text-center mt-4 text-sm">
+            No Account?
+            <a href="/register" class="text-accent hover:underline">Register</a>
+          </p>
+        </div>
+
+        <!-- Admin Login Form -->
+        <div id="admin-login" class="hidden">
+          <h1 class="text-2xl font-bold text-center mb-4">Admin Login</h1>
+          <form action="/login" method="POST" class="space-y-4">
+            <input type="hidden" name="role" value="admin" />
+            <div>
+              <label for="admin-email" class="block text-sm font-medium"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="admin-email"
+                name="email"
+                class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent text-black"
+                placeholder="Enter Admin Email"
+                required
+              />
+            </div>
+
+            <div>
+              <label for="admin-password" class="block text-sm font-medium"
+                >Password</label
+              >
+              <input
+                type="password"
+                id="admin-password"
+                name="password"
+                class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent text-black"
+                placeholder="Enter Admin Password"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="w-full bg-accent text-white py-2 rounded hover:bg-cyan-500 transition"
+            >
+              Login
+            </button>
+          </form>
+
+          <p class="text-center mt-4 text-sm">
+            <button id="show-user-login" class="text-accent hover:underline">
+              Login as User
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Tab switching functionality
+      const userTab = document.getElementById("user-tab");
+      const adminTab = document.getElementById("admin-tab");
+      const userLogin = document.getElementById("user-login");
+      const adminLogin = document.getElementById("admin-login");
+      const showAdminBtn = document.getElementById("show-admin-login");
+      const showUserBtn = document.getElementById("show-user-login");
+
+      function showUserLoginPanel() {
+        userTab.classList.add("border-accent", "text-accent");
+        adminTab.classList.remove("border-accent", "text-accent");
+        adminTab.classList.add("border-transparent");
+        userLogin.classList.remove("hidden");
+        userLogin.classList.add("block");
+        adminLogin.classList.add("hidden");
+        adminLogin.classList.remove("block");
+      }
+
+      function showAdminLoginPanel() {
+        adminTab.classList.add("border-accent", "text-accent");
+        userTab.classList.remove("border-accent", "text-accent");
+        userTab.classList.add("border-transparent");
+        adminLogin.classList.remove("hidden");
+        adminLogin.classList.add("block");
+        userLogin.classList.add("hidden");
+        userLogin.classList.remove("block");
+      }
+
+      userTab.addEventListener("click", showUserLoginPanel);
+      adminTab.addEventListener("click", showAdminLoginPanel);
+      showAdminBtn.addEventListener("click", showAdminLoginPanel);
+      showUserBtn.addEventListener("click", showUserLoginPanel);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+<% if (locals.errors) { %> 
+  <% errors.forEach(function(error) { %>
+    <div class="bg-yellow-500 text-white p-3 rounded-lg mb-4 flex justify-between items-center">
+      <span><%= error.msg %></span>
+      <button onclick="this.parentElement.style.display='none';" class="text-white hover:text-black">&times;</button>
+    </div>
+  <% }); %> 
+<% } %>
+
+<% if (success_msg != '') { %>
+  <div class="bg-green-500 text-white p-3 rounded-lg mb-4 flex justify-between items-center">
+    <span><%= success_msg %></span>
+    <button onclick="this.parentElement.style.display='none';" class="text-white hover:text-black">&times;</button>
+  </div>
+<% } %>
+
+<% if (error_msg != '') { %>
+  <div class="bg-red-500 text-white p-3 rounded-lg mb-4 flex justify-between items-center">
+    <span><%= error_msg %></span>
+    <button onclick="this.parentElement.style.display='none';" class="text-white hover:text-black">&times;</button>
+  </div>
+<% } %>
+
+<% if (error != '') { %>
+  <div class="bg-red-500 text-white p-3 rounded-lg mb-4 flex justify-between items-center">
+    <span><%= error %></span>
+    <button onclick="this.parentElement.style.display='none';" class="text-white hover:text-black">&times;</button>
+  </div>
+<% } %>

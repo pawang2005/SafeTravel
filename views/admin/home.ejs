@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-6">
+        <!-- Navbar -->
+        <nav class="bg-white p-4 shadow-md flex justify-between">
+            <h1 class="text-2xl font-bold text-blue-600">Admin Dashboard</h1>
+            <a href="/admin/logout" class="bg-red-500 text-white px-4 py-2 rounded">Logout</a>
+        </nav>
+
+        <!-- Dashboard Cards -->
+        <div class="grid grid-cols-3 gap-6 my-6">
+            <div class="bg-white p-6 rounded shadow">
+                <h2 class="text-xl font-semibold">Total Tours</h2>
+                <p class="text-3xl font-bold">10</p>
+            </div>
+            <div class="bg-white p-6 rounded shadow">
+                <h2 class="text-xl font-semibold">Total Bookings</h2>
+                <p class="text-3xl font-bold">110</p>
+            </div>
+            <div class="bg-white p-6 rounded shadow">
+                <h2 class="text-xl font-semibold">Total Revenue</h2>
+                <p class="text-3xl font-bold">₹100000</p>
+            </div>
+        </div>
+
+        <!-- Add New Tour -->
+        <div class="bg-white p-6 rounded shadow">
+            <h2 class="text-xl font-semibold mb-4">Create a New Tour</h2>
+            <form action="/admin/create-tour" method="POST" class="grid grid-cols-2 gap-4">
+                <input type="text" name="name" placeholder="Tour Name" required class="p-2 border rounded">
+                <input type="text" name="location" placeholder="Location" required class="p-2 border rounded">
+                <input type="number" name="pricePerTicket" placeholder="Price per Ticket" required class="p-2 border rounded">
+                <input type="number" name="availableSeats" placeholder="Available Seats" required class="p-2 border rounded">
+                <button type="submit" class="col-span-2 bg-blue-500 text-white p-2 rounded">Create Tour</button>
+            </form>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="bg-white p-6 mt-6 rounded shadow">
+            <h2 class="text-xl font-semibold mb-4">Bookings</h2>
+            <table class="w-full border-collapse border">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="p-2 border">Name</th>
+                        <th class="p-2 border">Location</th>
+                        <th class="p-2 border">Price Per Ticket</th>
+                        <th class="p-2 border">Available Seats</th>
+                        <th class="p-2 border">Tours</th>
+                    </tr>
+                    <% tours.forEach(tour => { %>
+                        <tr class="text-center">
+                            <td class="p-2 border"><%= tour.name %></td>
+                            <td class="p-2 border"><%= tour.location %></td>
+                            <td class="p-2 border">₹<%= tour.pricePerTicket %></td>
+                            <td class="p-2 border"><%= tour.availableSeats %></td>
+                            <td class="p-2 border text-blue-700"><a href="/admin/tours/<%= tour._id %>">Tour</a></td>
+                        </tr>
+                        <% }); %>
+                </thead>
+                
+            </table>
+        </div>
+    </div>
+</body>
+</html>

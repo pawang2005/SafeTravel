@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+
+    <!-- Custom CSS -->
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .dashboard-container {
+        max-width: 1200px;
+        margin: auto;
+      }
+      .card {
+        border-radius: 10px;
+        transition: transform 0.2s;
+      }
+      .card:hover {
+        transform: scale(1.03);
+      }
+      .btn-book {
+        background-color: #ff5722;
+        border: none;
+      }
+      .btn-book:hover {
+        background-color: #e64a19;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container dashboard-container mt-5">
+      <h1 class="mb-3 text-center text-primary">User Dashboard</h1>
+      <div class="text-center mb-4">
+        <a href="/users/logout" class="btn btn-secondary">Logout</a>
+      </div>
+      <div>
+        <h2 class="text-center mb -4">Welcome, <%= user.name %></h2>
+      </div>
+      <div>
+        <a href="/users/bookings"
+          ><h2 class="text-center mb -4">My Bookings</h2></a
+        >
+      </div>
+      <!-- Show Available Tours -->
+      <h2 class="text-center mb-4">Available Tours</h2>
+      <div class="row">
+        <% if (tours.length > 0) { %> <% tours.forEach(tour => { %>
+        <div class="col-md-4">
+          <div class="card shadow-sm mb-4">
+            <div class="card-body">
+              <h5 class="card-title text-primary"><%= tour.name %></h5>
+              <p class="card-text">
+                <strong>📍 Location:</strong> <%= tour.location %> <br />
+                <strong>💰 Price per Ticket:</strong> ₹<%= tour.pricePerTicket
+                %> <br />
+                <strong>🎟 Available Seats:</strong> <%= tour.availableSeats %>
+              </p>
+
+              <!-- Booking Form -->
+              <form action="/users/book-ticket/<%= tour._id %>" method="GET">
+                <button type="submit" class="btn btn-book w-100 text-white">
+                  Book Now
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <% }) %> <% } else { %>
+        <p class="text-center">No tours available at the moment.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
